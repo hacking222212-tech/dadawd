@@ -877,16 +877,13 @@ async def on_ready():
     bot.add_view(CloseTicketView())
     bot.add_view(VerifyView())
     print(f"✅ Bot eingeloggt als {bot.user}")
-    # Globale Commands syncen
-    synced = await bot.tree.sync()
-    print(f"✅ {len(synced)} Commands synchronisiert")
-    # Vouch + setvouchchannel sofort für alle Server registrieren
+    # Globale Commands leeren
+    bot.tree.clear_commands(guild=None)
+    await bot.tree.sync()
+    # Alle Commands guild-spezifisch registrieren
     for guild in bot.guilds:
-        bot.tree.add_command(
-            app_commands.Command(name="vouch", description="Bewertung abgeben", callback=vouch_cmd.callback),
-            guild=guild, override=True
-        )
-        await bot.tree.sync(guild=guild)
-        print(f"✅ /vouch in {guild.name} registriert")
+        bot.tree.copy_global_to(guild=guild)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"✅ {len(synced)} Commands in {guild.name}")
 
 bot.run(TOKEN)
