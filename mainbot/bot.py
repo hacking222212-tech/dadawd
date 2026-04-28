@@ -880,13 +880,7 @@ async def on_ready():
     bot.add_view(CloseTicketView())
     bot.add_view(VerifyView())
     print(f"✅ Bot eingeloggt als {bot.user}")
-    # Globale Commands leeren
-    bot.tree.clear_commands(guild=None)
-    await bot.tree.sync()
-    # Alle Commands guild-spezifisch registrieren
-    for guild in bot.guilds:
-        bot.tree.copy_global_to(guild=guild)
-        synced = await bot.tree.sync(guild=guild)
-        print(f"✅ {len(synced)} Commands in {guild.name}")
+    synced = await bot.tree.sync()
+    print(f"✅ {len(synced)} Commands synchronisiert")
 
 bot.run(TOKEN)
