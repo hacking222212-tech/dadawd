@@ -848,7 +848,6 @@ async def setvouchchannel_cmd(interaction: discord.Interaction, channel: discord
     scfg(interaction.guild.id, "vouch_channel", str(channel.id))
     await interaction.response.send_message(f"✅ Vouch-Channel: {channel.mention}", ephemeral=True)
 
-
 @bot.tree.command(name="greroll", description="Giveaway neu auslosen")
 @app_commands.checks.has_permissions(manage_guild=True)
 @app_commands.describe(message_id="Message ID des Giveaways")
@@ -878,7 +877,16 @@ async def on_ready():
     bot.add_view(CloseTicketView())
     bot.add_view(VerifyView())
     print(f"✅ Bot eingeloggt als {bot.user}")
+    # Globale Commands syncen
     synced = await bot.tree.sync()
     print(f"✅ {len(synced)} Commands synchronisiert")
+    # Vouch + setvouchchannel sofort für alle Server registrieren
+    for guild in bot.guilds:
+        bot.tree.add_command(
+            app_commands.Command(name="vouch", description="Bewertung abgeben", callback=vouch_cmd.callback),
+            guild=guild, override=True
+        )
+        await bot.tree.sync(guild=guild)
+        print(f"✅ /vouch in {guild.name} registriert")
 
 bot.run(TOKEN)
