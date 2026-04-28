@@ -1,0 +1,40 @@
+[
+  {
+    "id": "PARTNER-DF0011A6",
+    "typ": "partner",
+    "user": "38k7",
+    "user_id": "1497347502070825110",
+    "details": {},
+    "erstellt": "28.04.2026 20:35:12",
+    "verlauf": [
+      {
+        "author": "placeholder#5883",
+        "content": "<@1497347502070825110>",
+        "time": "28.04.2026 18:34",
+        "embeds": [
+          {
+            "title": "Partnerschaftsanfrage",
+            "fields": [
+              {
+                "name": "Server",
+                "value": "> daw"
+              },
+              {
+                "name": "Mitglieder",
+                "value": "> dwada"
+              },
+              {
+                "name": "Einladung",
+                "value": "> dwada"
+              },
+              {
+                "name": "Partner-ID",
+                "value": "```PARTNER-DF0011A6```"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

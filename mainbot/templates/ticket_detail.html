@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Ticket {{ ticket.id }}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#111214; color:#dcddde; font-family:'Segoe UI',sans-serif; padding:30px; }
+a.back { color:#5865F2; text-decoration:none; font-size:14px; display:inline-block; margin-bottom:20px; }
+.header { background:#1e1f22; border-radius:10px; padding:20px; border-left:4px solid {{ ticket.color }}; margin-bottom:16px; }
+.badge { display:inline-block; font-size:11px; padding:2px 10px; border-radius:20px; background:{{ ticket.color }}; color:#fff; font-weight:600; margin-bottom:8px; }
+.header h2 { font-size:18px; color:#fff; margin-bottom:4px; }
+.meta { font-size:12px; color:#72767d; }
+.details { background:#1e1f22; border-radius:10px; padding:20px; margin-bottom:16px; }
+.details h3 { font-size:12px; color:#72767d; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.drow { display:flex; gap:20px; flex-wrap:wrap; }
+.ditem label { font-size:11px; color:#72767d; text-transform:uppercase; }
+.ditem p { font-size:14px; color:#fff; margin-top:2px; }
+.chat { background:#1e1f22; border-radius:10px; padding:20px; }
+.chat h3 { font-size:12px; color:#72767d; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+.msg { padding:10px 0; border-bottom:1px solid #2b2d31; }
+.msg:last-child { border-bottom:none; }
+.mh { display:flex; gap:10px; align-items:baseline; margin-bottom:4px; }
+.mauthor { font-weight:600; color:#fff; font-size:14px; }
+.mtime { font-size:11px; color:#72767d; }
+.mcontent { font-size:14px; line-height:1.5; }
+.embed { background:#2b2d31; border-left:3px solid {{ ticket.color }}; border-radius:4px; padding:10px 14px; margin-top:6px; }
+.etitle { font-weight:600; color:#fff; font-size:14px; margin-bottom:6px; }
+.efield label { font-size:11px; color:#b5bac1; font-weight:600; }
+.efield p { font-size:13px; }
+</style>
+</head>
+<body>
+<a href="/" class="back">← Zurück</a>
+<div class="header">
+  <span class="badge">{{ ticket.label }}</span>
+  <h2>Ticket von {{ ticket.user }}</h2>
+  <div class="meta">{{ ticket.id }} &nbsp;•&nbsp; {{ ticket.erstellt }}</div>
+</div>
+{% if ticket.details %}
+<div class="details">
+  <h3>Details</h3>
+  <div class="drow">
+    {% for k,v in ticket.details.items() %}{% if v %}
+    <div class="ditem"><label>{{ k }}</label><p>{{ v }}</p></div>
+    {% endif %}{% endfor %}
+  </div>
+</div>
+{% endif %}
+<div class="chat">
+  <h3>Verlauf — {{ ticket.verlauf|length }} Nachrichten</h3>
+  {% for msg in ticket.verlauf %}
+  <div class="msg">
+    <div class="mh"><span class="mauthor">{{ msg.author }}</span><span class="mtime">{{ msg.time }}</span></div>
+    {% if msg.content %}<div class="mcontent">{{ msg.content }}</div>{% endif %}
+    {% for e in msg.embeds %}
+    <div class="embed">
+      {% if e.title %}<div class="etitle">{{ e.title }}</div>{% endif %}
+      {% for f in e.fields %}<div class="efield"><label>{{ f.name }}</label><p>{{ f.value }}</p></div>{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div style="color:#4e5058;text-align:center;padding:30px">Kein Verlauf</div>
+  {% endfor %}
+</div>
+</body>
+</html>

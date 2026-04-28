@@ -1,0 +1,29 @@
+[
+  {
+    "message_id": "1498773454520848424",
+    "channel_id": "1498725991080792162",
+    "guild_id": "1498725990015172822",
+    "preis": "Susano",
+    "winner_count": 1,
+    "end_ts": 1777405893,
+    "active": false
+  },
+  {
+    "message_id": "1498774076758692061",
+    "channel_id": "1498725991080792162",
+    "guild_id": "1498725990015172822",
+    "preis": "susano",
+    "winner_count": 1,
+    "end_ts": 1777406041,
+    "active": false
+  },
+  {
+    "message_id": "1498774537175695371",
+    "channel_id": "1498725991080792162",
+    "guild_id": "1498725990015172822",
+    "preis": "dwadadw",
+    "winner_count": 1,
+    "end_ts": 1777406151,
+    "active": false
+  }
+]
