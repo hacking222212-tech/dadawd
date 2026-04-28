@@ -796,9 +796,10 @@ async def giveaway_cmd(interaction: discord.Interaction):
 STARS = {"1": "⭐", "2": "⭐⭐", "3": "⭐⭐⭐", "4": "⭐⭐⭐⭐", "5": "⭐⭐⭐⭐⭐"}
 
 class VouchModal(discord.ui.Modal, title="Bewertung abgeben"):
-    verkäufer   = discord.ui.TextInput(label="Verkäufer (Name oder @)", placeholder="z.B. Kyron")
-    bewertung   = discord.ui.TextInput(label="Bewertung (1-5 Sterne)", placeholder="5", max_length=1)
-    kommentar   = discord.ui.TextInput(label="Kommentar", style=discord.TextStyle.paragraph, placeholder="Wie war deine Erfahrung?", max_length=500)
+    verkäufer = discord.ui.TextInput(label="Verkäufer (Name oder @)", placeholder="z.B. Kyron")
+    produkt   = discord.ui.TextInput(label="Gekauftes Produkt", placeholder="z.B. Premium — 1 Monat")
+    bewertung = discord.ui.TextInput(label="Bewertung (1-5 Sterne)", placeholder="5", max_length=1)
+    kommentar = discord.ui.TextInput(label="Kommentar", style=discord.TextStyle.paragraph, placeholder="Wie war deine Erfahrung?", max_length=500)
 
     async def on_submit(self, interaction: discord.Interaction):
         if self.bewertung.value not in ("1","2","3","4","5"):
@@ -814,6 +815,7 @@ class VouchModal(discord.ui.Modal, title="Bewertung abgeben"):
             "user": str(interaction.user),
             "user_id": str(interaction.user.id),
             "verkäufer": self.verkäufer.value,
+            "produkt": self.produkt.value,
             "bewertung": self.bewertung.value,
             "kommentar": self.kommentar.value,
             "datum": ts()
@@ -830,6 +832,7 @@ class VouchModal(discord.ui.Modal, title="Bewertung abgeben"):
         embed.add_field(name="Verkäufer", value=self.verkäufer.value, inline=True)
         embed.add_field(name="Käufer", value=interaction.user.mention, inline=True)
         embed.add_field(name="Bewertung", value=STARS.get(self.bewertung.value, "⭐"), inline=True)
+        embed.add_field(name="Produkt", value=self.produkt.value, inline=False)
         embed.add_field(name="Kommentar", value=self.kommentar.value, inline=False)
         embed.set_thumbnail(url=interaction.user.display_avatar.url)
         embed.set_footer(text=f"{interaction.user} • {vouch_count}. Vouch  •  {ts()}")
