@@ -427,34 +427,90 @@ async def setlogchannel_cmd(interaction: discord.Interaction, channel: discord.T
 
 @bot.event
 async def on_member_join(member):
-    ch = get_log_channel(member.guild)
+    cfg = gcfg(member.guild.id)
 
     # Unverified Rolle geben
-    cfg = gcfg(member.guild.id)
     unverified_role_id = cfg.get("unverified_role")
     if unverified_role_id:
         unverified_role = member.guild.get_role(int(unverified_role_id))
         if unverified_role:
             await member.add_roles(unverified_role)
 
-    if not ch: return
-    embed = discord.Embed(title="Mitglied beigetreten", color=0x1a3fdb)
+    # Log
+    log_ch = get_log_channel(member.guild)
+    if log_ch:
+        lembed = discord.Embed(title="Mitglied beigetreten", color=0x57f287)
+        lembed.set_thumbnail(url=member.display_avatar.url)
+        lembed.add_field(name="Nutzer", value=f"{member.mention} (`{member.id}`)", inline=False)
+        lembed.add_field(name="Account erstellt", value=member.created_at.strftime("%d.%m.%Y"), inline=True)
+        lembed.set_footer(text=ts())
+        await log_ch.send(embed=lembed)
+
+    # Willkommens-Channel
+    welcome_channel_id = cfg.get("welcome_channel")
+    if not welcome_channel_id:
+        return
+    wch = member.guild.get_channel(int(welcome_channel_id))
+    if not wch:
+        return
+
+    member_count = member.guild.member_count
+
+    embed = discord.Embed(color=0x5865F2)
+    embed.set_author(name=f"Neues Mitglied  ·  #{member_count}", icon_url=member.display_avatar.url)
     embed.set_thumbnail(url=member.display_avatar.url)
-    embed.add_field(name="Nutzer", value=f"{member.mention} (`{member.id}`)", inline=False)
-    embed.add_field(name="Account erstellt", value=member.created_at.strftime("%d.%m.%Y"), inline=True)
-    embed.set_footer(text=ts())
-    await ch.send(embed=embed)
+    embed.description = (
+        f"**{member.mention}** ist jetzt dabei — nice.\n\n"
+        f"Mach dich vertraut, lies die Regeln durch\n"
+        f"und wenn du Fragen hast einfach ein Ticket aufmachen.\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🗓️ Account seit: **{member.created_at.strftime('%d.%m.%Y')}**\n"
+        f"👥 Ihr seid jetzt: **{member_count} Leute**"
+    )
+    embed.set_footer(text=f"ID: {member.id}")
+
+    await wch.send(embed=embed)
 
 @bot.event
 async def on_member_remove(member):
-    ch = get_log_channel(member.guild)
-    if not ch: return
-    embed = discord.Embed(title="Mitglied verlassen", color=0x1a3fdb)
+    cfg = gcfg(member.guild.id)
+
+    # Log
+    log_ch = get_log_channel(member.guild)
+    if log_ch:
+        lembed = discord.Embed(title="Mitglied verlassen", color=0xed4245)
+        lembed.set_thumbnail(url=member.display_avatar.url)
+        lembed.add_field(name="Nutzer", value=f"{member} (`{member.id}`)", inline=False)
+        lembed.add_field(name="Rollen", value=" ".join([r.mention for r in member.roles[1:]]) or "Keine", inline=False)
+        lembed.set_footer(text=ts())
+        await log_ch.send(embed=lembed)
+
+    # Verlassen-Channel
+    leave_channel_id = cfg.get("leave_channel") or cfg.get("welcome_channel")
+    if not leave_channel_id:
+        return
+    lch = member.guild.get_channel(int(leave_channel_id))
+    if not lch:
+        return
+
+    member_count = member.guild.member_count
+    rollen = [r.name for r in member.roles[1:]]
+    rollen_text = ", ".join(rollen) if rollen else "—"
+    dabei_seit = member.joined_at.strftime("%d.%m.%Y") if member.joined_at else "?"
+
+    embed = discord.Embed(color=0xed4245)
+    embed.set_author(name="Jemand hat den Server verlassen", icon_url=member.display_avatar.url)
     embed.set_thumbnail(url=member.display_avatar.url)
-    embed.add_field(name="Nutzer", value=f"{member} (`{member.id}`)", inline=False)
-    embed.add_field(name="Rollen", value=" ".join([r.mention for r in member.roles[1:]]) or "Keine", inline=False)
-    embed.set_footer(text=ts())
-    await ch.send(embed=embed)
+    embed.description = (
+        f"**{member.name}** ist weg.\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📅 War dabei seit: **{dabei_seit}**\n"
+        f"👥 Noch dabei: **{member_count} Leute**\n"
+        f"🏷️ Hatte: **{rollen_text}**"
+    )
+    embed.set_footer(text=f"ID: {member.id}")
+
+    await lch.send(embed=embed)
 
 @bot.event
 async def on_member_ban(guild, user):
@@ -669,6 +725,20 @@ async def setverifiedrole_cmd(interaction: discord.Interaction, rolle: discord.R
 async def setunverifiedrole_cmd(interaction: discord.Interaction, rolle: discord.Role):
     scfg(interaction.guild.id, "unverified_role", str(rolle.id))
     await interaction.response.send_message(f"✅ Unverified-Rolle: {rolle.mention}", ephemeral=True)
+
+@bot.tree.command(name="setwelcomechannel", description="Willkommens-Channel einstellen")
+@app_commands.checks.has_permissions(administrator=True)
+@app_commands.describe(channel="Channel für Willkommens- und Verlassen-Nachrichten")
+async def setwelcomechannel_cmd(interaction: discord.Interaction, channel: discord.TextChannel):
+    scfg(interaction.guild.id, "welcome_channel", str(channel.id))
+    await interaction.response.send_message(f"✅ Willkommens-Channel: {channel.mention}", ephemeral=True)
+
+@bot.tree.command(name="setleavechannel", description="Verlassen-Channel separat einstellen (optional)")
+@app_commands.checks.has_permissions(administrator=True)
+@app_commands.describe(channel="Channel für Verlassen-Nachrichten")
+async def setleavechannel_cmd(interaction: discord.Interaction, channel: discord.TextChannel):
+    scfg(interaction.guild.id, "leave_channel", str(channel.id))
+    await interaction.response.send_message(f"✅ Verlassen-Channel: {channel.mention}", ephemeral=True)
 
 
 
